@@ -4,6 +4,7 @@ var cron = require('node-cron');
 var trim = require('trim');
 var zendesk = require('node-zendesk');
 var htmlToText = require('html-to-text');
+var postmark = require("postmark");
 
 // SETUP: zendesk
 var zendeskclient = zendesk.createClient({
@@ -274,6 +275,37 @@ function adjustQuestionsFromForgePortal() {
     });
 }
 
+function getRecentlyClosed() {
+    var postmarkClient = new postmark.Client(config.postmark.credentials.accountId);
+
+    var now = new Date();
+    var before = new Date(now - 60000 * 60 * 3 /*hour*/);
+
+    zendeskclient.search.query("solved>" + before.toISOString(), function (err, req, tickets) {
+        if (err != null || tickets == null || typeof tickets.forEach !== "function") {
+            console.log(err);
+            return;
+        }
+        tickets.forEach(function (ticket, index) {
+            if (ticket.via.channel === 'api') return; // stackoverflow, not possible to get NPS
+
+            zendeskclient.users.show(ticket.requester_id, function (err, req, user) {
+                postmarkClient.sendEmail({
+                    "From": process.env.POSTMARK_FROM,
+                    "To": user.email,
+                    "Subject": "Autodesk Forge: How did we do?",
+                    "TextBody": "...."
+                }).then(function (res) {
+                    console.log('email sent to ' + user.email)
+                }).catch(function (err) {
+                    console.log(err);
+                });
+            });
+        });
+    });
+}
+
 console.log('Running for tags: ' + TAGS.join(';'));
 adjustQuestionsFromForgePortal();
 getNewQuestions();
+//getRecentlyClosed();
