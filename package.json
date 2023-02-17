@@ -13,6 +13,6 @@
     "node-zendesk": "1.4.0",
     "request": "^2.87.0",
     "sanitize-html": "^1.12.0",
-    "trim": "0.0.1"
+    "trim": "0.0.3"
   }
 }
