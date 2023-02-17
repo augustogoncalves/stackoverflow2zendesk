@@ -10,7 +10,7 @@
     "express": "^4.16.3",
     "html-to-text": "^4.0.0",
     "node-cron": "^1.2.1",
-    "node-zendesk": "1.4.0",
+    "node-zendesk": "2.2.0",
     "request": "^2.87.0",
     "sanitize-html": "^1.12.0",
     "trim": "0.0.1"
